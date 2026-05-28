@@ -375,6 +375,74 @@ function showToast(icon, title, sub) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
+// ═══ CAPTURE ═══
+let mediaRecorder = null, recChunks = [], recAnimFrame = null;
+
+function makeComposite() {
+  const tmp = document.createElement('canvas');
+  tmp.width = cv.width; tmp.height = cv.height;
+  const t = tmp.getContext('2d');
+  t.drawImage(document.getElementById('video'), 0, 0, tmp.width, tmp.height);
+  t.drawImage(cv, 0, 0);
+  return tmp;
+}
+
+function capturePhoto() {
+  const tmp = makeComposite();
+  tmp.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `taksin_${Date.now()}.jpg`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+    showToast('📸', 'บันทึกภาพแล้ว', 'ตรวจสอบใน Downloads');
+  }, 'image/jpeg', 0.92);
+}
+
+function toggleRecord() {
+  const btn = document.getElementById('rec-btn');
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+    cancelAnimationFrame(recAnimFrame);
+    return;
+  }
+
+  // composite canvas stream
+  const compCV = document.createElement('canvas');
+  compCV.width = cv.width; compCV.height = cv.height;
+  const compCtx = compCV.getContext('2d');
+
+  const drawComp = () => {
+    compCtx.drawImage(document.getElementById('video'), 0, 0, compCV.width, compCV.height);
+    compCtx.drawImage(cv, 0, 0);
+    recAnimFrame = requestAnimationFrame(drawComp);
+  };
+  drawComp();
+
+  const mimeType = ['video/mp4', 'video/webm;codecs=vp9', 'video/webm'].find(t => MediaRecorder.isTypeSupported(t)) || '';
+  const ext = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
+
+  mediaRecorder = new MediaRecorder(compCV.captureStream(30), mimeType ? { mimeType } : {});
+  recChunks = [];
+
+  mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recChunks.push(e.data); };
+  mediaRecorder.onstop = () => {
+    cancelAnimationFrame(recAnimFrame);
+    const blob = new Blob(recChunks, { type: mimeType || 'video/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `taksin_${Date.now()}.${ext}`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    btn.textContent = '⏺'; btn.classList.remove('recording');
+    showToast('🎬', 'บันทึกวิดีโอแล้ว', 'ตรวจสอบใน Downloads');
+  };
+
+  mediaRecorder.start();
+  btn.textContent = '⏹'; btn.classList.add('recording');
+  showToast('⏺', 'กำลังบันทึก...', 'กด ⏹ เพื่อหยุด');
+}
+
 // ═══ MAIN LOOP ═══
 function loop() {
   T += .016;
