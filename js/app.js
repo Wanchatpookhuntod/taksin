@@ -13,6 +13,8 @@ let userLat = null, userLng = null, rawH = 0, smoothH = 0;
 let aimedSpot = null, activeVFX = null, vfxFade = 0;
 let unlocked = {}, toastTimer = null, T = 0;
 let ps = [], ss = [];
+let headingOffset = parseInt(localStorage.getItem('headingOffset') || '0');
+let hBuf = [], compassAccuracy = 1;
 
 // ═══ CANVAS ═══
 const cv = document.getElementById('vfx');
@@ -107,10 +109,16 @@ function setDemo() {
 // ═══ COMPASS ═══
 function startCompass() {
   const handleIOS = e => {
-    if (e.webkitCompassHeading !== undefined) rawH = e.webkitCompassHeading;
+    if (e.webkitCompassHeading !== undefined) {
+      rawH = (e.webkitCompassHeading + headingOffset + 360) % 360;
+      // webkitCompassAccuracy: องศาความเบี่ยงเบน, -1 = unknown
+      if (e.webkitCompassAccuracy >= 0)
+        compassAccuracy = Math.max(0, 1 - e.webkitCompassAccuracy / 45);
+    }
   };
   const handleAbsolute = e => {
-    if (e.alpha !== null) rawH = (360 - e.alpha + 360) % 360;
+    if (e.alpha !== null)
+      rawH = ((360 - e.alpha + 360) % 360 + headingOffset + 360) % 360;
   };
 
   if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
@@ -131,6 +139,50 @@ function startCompass() {
     }, 500);
   }
 }
+
+// ═══ COMPASS ACCURACY ═══
+function updateAccuracy() {
+  hBuf.push(rawH);
+  if (hBuf.length > 20) hBuf.shift();
+  if (hBuf.length < 8) return;
+  // circular mean resultant length — 1=เสถียร 0=สั่น
+  const sx = hBuf.reduce((s, h) => s + Math.sin(h * Math.PI / 180), 0);
+  const cx = hBuf.reduce((s, h) => s + Math.cos(h * Math.PI / 180), 0);
+  compassAccuracy = Math.sqrt(sx * sx + cx * cx) / hBuf.length;
+  const btn = document.getElementById('cal-btn');
+  if (btn) btn.classList.toggle('warn', compassAccuracy < 0.75);
+  // อัปเดต accuracy bar ใน panel
+  const bar = document.getElementById('cal-acc-fill');
+  if (bar) {
+    bar.style.width = `${Math.round(compassAccuracy * 100)}%`;
+    bar.style.background = compassAccuracy > 0.85 ? '#4CAF50' : compassAccuracy > 0.65 ? '#FFC107' : '#F44336';
+  }
+  const calH = document.getElementById('cal-heading');
+  if (calH) calH.textContent = `${Math.round(smoothH)}°`;
+}
+
+// ═══ CALIBRATION ═══
+function openCal() {
+  const panel = document.getElementById('cal-panel');
+  panel.style.display = 'flex';
+  document.getElementById('cal-offset-val').textContent = fmtOffset(headingOffset);
+}
+function closeCal() {
+  document.getElementById('cal-panel').style.display = 'none';
+}
+function adjustOffset(delta) {
+  headingOffset += delta;
+  if (headingOffset > 180) headingOffset -= 360;
+  if (headingOffset < -180) headingOffset += 360;
+  localStorage.setItem('headingOffset', headingOffset);
+  document.getElementById('cal-offset-val').textContent = fmtOffset(headingOffset);
+}
+function resetOffset() {
+  headingOffset = 0;
+  localStorage.setItem('headingOffset', 0);
+  document.getElementById('cal-offset-val').textContent = '0°';
+}
+function fmtOffset(v) { return `${v > 0 ? '+' : ''}${v}°`; }
 
 // ═══ COMPASS HUD ═══
 function drawCompass() {
@@ -467,6 +519,7 @@ function showToast(icon, title, sub) {
 function loop() {
   T += .016;
   smoothH = sAngle(smoothH, rawH, .08);
+  updateAccuracy();
   checkAim();
   drawCompass();
   drawVFX(T);

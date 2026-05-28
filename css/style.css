@@ -81,3 +81,50 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes pulse-ring{0%,100%{box-shadow:0 0 32px rgba(201,168,76,.5)}50%{box-shadow:0 0 55px rgba(201,168,76,.95)}}
+@keyframes fig8{
+  0%  {transform:translate(0,0)        rotate(0deg)}
+  12% {transform:translate(30px,-20px) rotate(-35deg)}
+  25% {transform:translate(0,0)        rotate(0deg)}
+  37% {transform:translate(-30px,-20px)rotate(35deg)}
+  50% {transform:translate(0,0)        rotate(0deg)}
+  62% {transform:translate(30px,-20px) rotate(-35deg)}
+  75% {transform:translate(0,0)        rotate(0deg)}
+  87% {transform:translate(-30px,-20px)rotate(35deg)}
+  100%{transform:translate(0,0)        rotate(0deg)}
+}
+
+/* calibration button */
+#cal-btn{position:absolute;top:136px;right:16px;
+  background:rgba(4,2,1,.75);border:1px solid rgba(201,168,76,.25);border-radius:20px;
+  color:rgba(201,168,76,.55);font-size:10px;letter-spacing:.08em;
+  padding:5px 12px;cursor:pointer;pointer-events:auto;transition:all .3s;font-family:sans-serif}
+#cal-btn.warn{border-color:rgba(255,140,60,.7);color:rgba(255,140,60,.95);
+  box-shadow:0 0 12px rgba(255,100,30,.35);animation:blink .7s infinite}
+
+/* calibration panel */
+#cal-panel{position:fixed;inset:0;z-index:30;background:rgba(4,2,1,.97);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;font-family:sans-serif;text-align:center;padding:40px}
+.cal-title{font-size:16px;color:#F0D080;letter-spacing:.12em;text-shadow:0 0 16px #C9A84C}
+.cal-acc-wrap{width:220px}
+.cal-acc-label{font-size:9px;color:rgba(201,168,76,.4);letter-spacing:.1em;margin-bottom:5px}
+.cal-acc-bar{width:100%;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+#cal-acc-fill{height:100%;width:0%;border-radius:2px;transition:width .4s,background .4s}
+.cal-fig8-wrap{width:110px;height:80px;display:flex;align-items:center;justify-content:center}
+.cal-phone{font-size:38px;animation:fig8 2.2s ease-in-out infinite}
+.cal-hint{font-size:13px;color:rgba(201,168,76,.6);line-height:1.8}
+.cal-hdg-row{display:flex;align-items:center;gap:10px;
+  background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);
+  border-radius:12px;padding:8px 20px}
+.cal-hdg-label{font-size:10px;color:rgba(201,168,76,.4);letter-spacing:.08em}
+#cal-heading{font-size:20px;color:#F0D080;min-width:44px;text-align:right}
+.cal-offset-row{display:flex;align-items:center;gap:18px}
+.cal-adj{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);
+  color:#F0D080;font-size:16px;width:54px;height:54px;border-radius:50%;cursor:pointer}
+#cal-offset-val{font-size:22px;color:#F0D080;min-width:64px;letter-spacing:.04em}
+.cal-reset{background:none;border:1px solid rgba(201,168,76,.2);
+  color:rgba(201,168,76,.45);font-size:11px;letter-spacing:.1em;
+  padding:8px 20px;border-radius:16px;cursor:pointer}
+.cal-done{background:linear-gradient(135deg,#7A5E1E,#C9A84C);color:#050301;border:none;
+  padding:12px 36px;border-radius:30px;font-size:14px;letter-spacing:.1em;
+  cursor:pointer;font-weight:700;box-shadow:0 0 20px rgba(201,168,76,.35)}
