@@ -3,8 +3,9 @@ const SPOTS = [
   { id: "prang",    name: "พระปรางค์สามยอด", desc: "ศูนย์กลางพลังขอม",   lat: 14.802964261273392, lng: 100.61404536171183, icon: "🏛️", vfx: "golden" },
   { id: "menument", name: "วงเวียนสระแก้ว",       desc: "ใจกลางเมือง",  lat: 14.799881897215414, lng: 100.634216288860815, icon: "⛩️", vfx: "sacred" },
   { id: "wang",     name: "วังนารายณ์",       desc: "ฐานบัญชาการตากสิน", lat: 14.799821766651421, lng: 100.6106419908688, icon: "⚔️", vfx: "battle" },
+  { id: "lotus",    name: "สถานที่บัว",        desc: "ดินแดนแห่งบัวงาม",  lat: 14.80470016742224,  lng: 100.66359567877893, icon: "🪷", vfx: "lotus" },
 ];
-const VFX_LABELS = { golden: "✦ SACRED LIGHT", sacred: "◈ RELIC AURA", battle: "⚔ BATTLE FIRE" };
+const VFX_LABELS = { golden: "✦ SACRED LIGHT", sacred: "◈ RELIC AURA", battle: "⚔ BATTLE FIRE", lotus: "🪷 LOTUS BLOOM" };
 const AIM_DEG = 22, UNLOCK_M = 200;
 
 // ═══ STATE ═══
@@ -226,6 +227,7 @@ function drawVFX(t) {
   if (activeVFX === 'golden') vfxGolden(t, W, H, fade);
   else if (activeVFX === 'sacred') vfxSacred(t, W, H, fade);
   else if (activeVFX === 'battle') vfxBattle(t, W, H, fade);
+  else if (activeVFX === 'lotus')  vfxLotus(t, W, H, fade);
 
   const vg = ctx.createRadialGradient(W / 2, H / 2, H * .18, W / 2, H / 2, H * .85);
   vg.addColorStop(0, 'rgba(5,3,1,0)'); vg.addColorStop(1, `rgba(5,3,1,${.55 * fade})`);
@@ -327,6 +329,92 @@ function vfxBattle(t, W, H, fade) {
     const a = s.opacity * Math.sin(s.life * Math.PI) * fade;
     const gr = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.size);
     gr.addColorStop(0, `rgba(75,50,35,${a})`); gr.addColorStop(1, 'rgba(75,50,35,0)');
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2); ctx.fillStyle = gr; ctx.fill();
+  });
+}
+
+// วาดกลีบบัวหนึ่งกลีบ (รูปทรงรี-แหลม เหมือนกลีบบัว/ซากุระ)
+function drawPetal(ctx, x, y, rx, ry, angle, color, alpha) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  ctx.globalAlpha = alpha;
+  ctx.beginPath();
+  // กลีบบัว: โค้งด้านล่างกว้าง ปลายแหลมด้านบน
+  ctx.moveTo(0, -ry);
+  ctx.bezierCurveTo( rx * 1.1,  -ry * 0.5,  rx,  ry * 0.6,  0,  ry);
+  ctx.bezierCurveTo(-rx,         ry * 0.6, -rx * 1.1, -ry * 0.5,  0, -ry);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+  // เส้นกลางกลีบ (ลายเส้นบาง)
+  ctx.beginPath();
+  ctx.moveTo(0, -ry * 0.9);
+  ctx.lineTo(0,  ry * 0.8);
+  ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.35})`;
+  ctx.lineWidth = 0.6;
+  ctx.stroke();
+  ctx.restore();
+}
+
+function mkLotus(W, H) {
+  const colors = [
+    'rgba(255,182,215,1)', // ชมพูอ่อน
+    'rgba(240,160,200,1)', // ชมพูกลาง
+    'rgba(255,210,230,1)', // ชมพูซีด
+    'rgba(220,130,180,1)', // ม่วงชมพู
+    'rgba(255,240,248,1)', // ขาวชมพู
+  ];
+  return {
+    x: Math.random() * W,
+    y: -20 - Math.random() * 60,
+    vx: (Math.random() - 0.5) * 0.8,
+    vy: 0.6 + Math.random() * 1.0,
+    rx: 5 + Math.random() * 7,
+    ry: 9 + Math.random() * 10,
+    angle: Math.random() * Math.PI * 2,
+    spin: (Math.random() - 0.5) * 0.04,
+    swing: (Math.random() - 0.5) * 0.012,
+    phase: Math.random() * Math.PI * 2,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    alpha: 0.5 + Math.random() * 0.5,
+    life: 0,
+  };
+}
+
+function vfxLotus(t, W, H, fade) {
+  // พื้นหลังรัศมีสีชมพูอ่อน
+  const bg = ctx.createRadialGradient(W / 2, H * 0.4, H * 0.05, W / 2, H * 0.4, H * 0.9);
+  bg.addColorStop(0, `rgba(255,200,230,${0.08 * fade})`);
+  bg.addColorStop(0.5, `rgba(220,140,190,${0.05 * fade})`);
+  bg.addColorStop(1, 'rgba(180,80,140,0)');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  // reinit เป็นกลีบบัวถ้า ps[] ยังเป็น particle แบบเดิม
+  if (!ps.length || ps[0].rx === undefined) {
+    ps = Array.from({ length: 80 }, () => { const p = mkLotus(W, H); p.y = Math.random() * H; return p; });
+  }
+
+  ps.forEach((p, i) => {
+    p.angle += p.spin;
+    p.vx    += p.swing * Math.sin(t * 0.9 + p.phase);
+    p.x     += p.vx + Math.sin(t * 0.6 + p.phase) * 0.4;
+    p.y     += p.vy;
+    p.life  += 0.004;
+
+    if (p.y > H + 30) { ps[i] = mkLotus(W, H); return; }
+
+    const al = Math.min(1, p.life * 8) * p.alpha * fade;
+    drawPetal(ctx, p.x, p.y, p.rx, p.ry, p.angle, p.color, al);
+  });
+
+  // ประกายแสงลอยขึ้น (shimmer)
+  ss.forEach((s, i) => {
+    s.x += s.vx + Math.sin(t * 0.5 + s.phase) * 0.3; s.y += s.vy; s.life += 0.003;
+    if (s.y < -80 || s.life > 1) { ss[i] = mkS(W, H); return; }
+    const a = s.opacity * Math.sin(s.life * Math.PI) * fade * 0.6;
+    const gr = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.size);
+    gr.addColorStop(0, `rgba(255,200,230,${a})`); gr.addColorStop(1, 'rgba(220,140,190,0)');
     ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2); ctx.fillStyle = gr; ctx.fill();
   });
 }
