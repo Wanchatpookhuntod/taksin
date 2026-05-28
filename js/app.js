@@ -1,7 +1,7 @@
 // ═══ SPOTS ═══
 const SPOTS = [
-  { id: "prang",    name: "พระปรางค์สามยอด", desc: "ศูนย์กลางพลังขอม",   lat: 14.7995, lng: 100.6136, icon: "🏛️", vfx: "golden" },
-  { id: "mahathat", name: "วัดมหาธาตุ",       desc: "พระธาตุคุ้มกันทัพ",  lat: 14.7992, lng: 100.6200, icon: "⛩️", vfx: "sacred" },
+  { id: "prang",    name: "พระปรางค์สามยอด", desc: "ศูนย์กลางพลังขอม",   lat: 14.802964261273392, lng: 100.61404536171183, icon: "🏛️", vfx: "golden" },
+  { id: "mahathat", name: "วัดมหาธาตุ",       desc: "พระธาตุคุ้มกันทัพ",  lat: 14.79965, lng: 100.63418, icon: "⛩️", vfx: "sacred" },
   { id: "wang",     name: "วังนารายณ์",       desc: "ฐานบัญชาการตากสิน", lat: 14.8050, lng: 100.6120, icon: "⚔️", vfx: "battle" },
 ];
 const VFX_LABELS = { golden: "✦ SACRED LIGHT", sacred: "◈ RELIC AURA", battle: "⚔ BATTLE FIRE" };
