@@ -111,8 +111,14 @@ function startCompass() {
       rawH = (e.webkitCompassHeading + compassOffset + 360) % 360;
   };
   const handleAbsolute = e => {
-    if (e.alpha !== null)
-      rawH = ((360 - e.alpha) + compassOffset + 360) % 360;
+    if (e.alpha === null || e.beta === null || e.gamma === null) return;
+    const D = Math.PI / 180;
+    const a = e.alpha * D, b = e.beta * D, g = e.gamma * D;
+    // tilt-compensated: project camera direction (-Z device axis) onto horizontal plane
+    const x = -Math.sin(g) * Math.cos(a) - Math.cos(g) * Math.sin(b) * Math.sin(a);
+    const y = -Math.sin(g) * Math.sin(a) + Math.cos(g) * Math.sin(b) * Math.cos(a);
+    const heading = (Math.atan2(x, y) * (180 / Math.PI) + 360) % 360;
+    rawH = (heading + compassOffset + 360) % 360;
   };
 
   if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
