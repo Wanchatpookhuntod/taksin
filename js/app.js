@@ -12,6 +12,7 @@ let userLat = null, userLng = null, rawH = 0, smoothH = 0;
 let aimedSpot = null, activeVFX = null, vfxFade = 0;
 let unlocked = {}, toastTimer = null, T = 0;
 let ps = [], ss = [];
+let compassOffset = parseInt(localStorage.getItem('compassOffset') || '0');
 
 // ═══ CANVAS ═══
 const cv = document.getElementById('vfx');
@@ -106,10 +107,12 @@ function setDemo() {
 // ═══ COMPASS ═══
 function startCompass() {
   const handleIOS = e => {
-    if (e.webkitCompassHeading !== undefined) rawH = e.webkitCompassHeading;
+    if (e.webkitCompassHeading !== undefined)
+      rawH = (e.webkitCompassHeading + compassOffset + 360) % 360;
   };
   const handleAbsolute = e => {
-    if (e.alpha !== null) rawH = (360 - e.alpha + 360) % 360;
+    if (e.alpha !== null)
+      rawH = ((360 - e.alpha) + compassOffset + 360) % 360;
   };
 
   if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
@@ -375,6 +378,14 @@ function showToast(icon, title, sub) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
+// ═══ COMPASS CALIBRATION ═══
+function adjustOffset(delta) {
+  compassOffset = (compassOffset + delta + 360) % 360;
+  localStorage.setItem('compassOffset', compassOffset);
+  const sign = delta > 0 ? '+' : '';
+  showToast('🧭', `ปรับทิศ ${sign}${delta}°`, `offset รวม: ${compassOffset}°`);
+}
+
 // ═══ CAPTURE ═══
 let mediaRecorder = null, recChunks = [], recAnimFrame = null;
 
@@ -450,5 +461,6 @@ function loop() {
   checkAim();
   drawCompass();
   drawVFX(T);
+  document.getElementById('heading-num').textContent = Math.round(smoothH) + '°';
   requestAnimationFrame(loop);
 }
