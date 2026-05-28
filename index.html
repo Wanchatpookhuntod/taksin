@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ตามรอยตากสิน</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="perm">
+  <div class="pi">⚔️</div>
+  <div class="pt">ตามรอยตากสิน</div>
+  <div class="pd">LOPBURI COMPASS AR<br>หันกล้องไปยังสถานที่ประวัติศาสตร์<br>เพื่อปลดล็อก VFX</div>
+  <div id="perr"></div>
+  <button class="pb" onclick="startApp()">เปิดกล้อง</button>
+</div>
+
+<video id="video" autoplay playsinline muted></video>
+<canvas id="vfx"></canvas>
+
+<div id="hud">
+  <div id="top">
+    <div><div class="tt">ตามรอยตากสิน</div><div class="ts">LOPBURI COMPASS AR</div></div>
+    <div style="text-align:right">
+      <div><span id="gps-dot"></span><span id="gps-txt">GPS...</span></div>
+      <div id="coord-txt">---, ---</div>
+    </div>
+  </div>
+
+  <div id="cmp-wrap">
+    <canvas id="cmp-cv" width="300" height="56"></canvas>
+    <div id="cmp-line"></div>
+  </div>
+
+  <div id="vfx-tag">◌ SEARCHING...</div>
+
+  <div id="aim"><div id="aim-dot"></div></div>
+
+  <div id="popup">
+    <div id="pop-icon">🏛️</div>
+    <div id="pop-name">พระปรางค์สามยอด</div>
+    <div id="pop-dist">---</div>
+  </div>
+
+  <div id="bottom">
+    <div id="b-name">กำลังหาตำแหน่ง...</div>
+    <div id="b-desc">หันกล้องไปหา spot เพื่อดู VFX</div>
+    <div id="b-chips"></div>
+  </div>
+
+  <div id="toast">
+    <div id="t-icon">⚔️</div>
+    <div id="t-title">UNLOCKED</div>
+    <div id="t-sub"></div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
