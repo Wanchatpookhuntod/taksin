@@ -1,8 +1,8 @@
 // ═══ SPOTS ═══
 const SPOTS = [
   { id: "prang",    name: "พระปรางค์สามยอด", desc: "ศูนย์กลางพลังขอม",   lat: 14.802964261273392, lng: 100.61404536171183, icon: "🏛️", vfx: "golden" },
-  { id: "mahathat", name: "วัดมหาธาตุ",       desc: "พระธาตุคุ้มกันทัพ",  lat: 14.79965, lng: 100.63418, icon: "⛩️", vfx: "sacred" },
-  { id: "wang",     name: "วังนารายณ์",       desc: "ฐานบัญชาการตากสิน", lat: 14.8050, lng: 100.6120, icon: "⚔️", vfx: "battle" },
+  { id: "menument", name: "วงเวียนสระแก้ว",       desc: "ใจกลางเมือง",  lat: 14.799881897215414, lng: 100.634216288860815, icon: "⛩️", vfx: "sacred" },
+  { id: "wang",     name: "วังนารายณ์",       desc: "ฐานบัญชาการตากสิน", lat: 14.799821766651421, lng: 100.6106419908688, icon: "⚔️", vfx: "battle" },
 ];
 const VFX_LABELS = { golden: "✦ SACRED LIGHT", sacred: "◈ RELIC AURA", battle: "⚔ BATTLE FIRE" };
 const AIM_DEG = 22, UNLOCK_M = 200;
@@ -105,10 +105,30 @@ function setDemo() {
 
 // ═══ COMPASS ═══
 function startCompass() {
-  const h = e => { rawH = e.webkitCompassHeading !== undefined ? e.webkitCompassHeading : (360 - e.alpha + 360) % 360; };
-  if (typeof DeviceOrientationEvent?.requestPermission === 'function')
-    DeviceOrientationEvent.requestPermission().then(s => { if (s === 'granted') addEventListener('deviceorientation', h); }).catch(() => {});
-  else addEventListener('deviceorientation', h);
+  const handleIOS = e => {
+    if (e.webkitCompassHeading !== undefined) rawH = e.webkitCompassHeading;
+  };
+  const handleAbsolute = e => {
+    if (e.alpha !== null) rawH = (360 - e.alpha + 360) % 360;
+  };
+
+  if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
+    // iOS — requires permission prompt
+    DeviceOrientationEvent.requestPermission()
+      .then(s => { if (s === 'granted') addEventListener('deviceorientation', handleIOS); })
+      .catch(() => {});
+  } else {
+    // Android — deviceorientationabsolute ให้ทิศเหนือจริง (magnetic north)
+    // ถ้าไม่รองรับจึง fallback ไป deviceorientation
+    let gotAbsolute = false;
+    addEventListener('deviceorientationabsolute', e => {
+      gotAbsolute = true;
+      handleAbsolute(e);
+    });
+    setTimeout(() => {
+      if (!gotAbsolute) addEventListener('deviceorientation', handleAbsolute);
+    }, 500);
+  }
 }
 
 // ═══ COMPASS HUD ═══
