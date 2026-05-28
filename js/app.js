@@ -75,7 +75,7 @@ async function startApp() {
     resizeCV();
     window.addEventListener('resize', resizeCV);
     startGPS();
-    startCompass();
+    await startCompass();
     buildChips();
     loop();
     showToast('⚔️', 'World AR พร้อมแล้ว', 'หันกล้องหา spot');
@@ -105,39 +105,95 @@ function setDemo() {
 }
 
 // ═══ COMPASS ═══
-function startCompass() {
-  const handleIOS = e => {
-    if (e.webkitCompassHeading !== undefined)
-      rawH = (e.webkitCompassHeading + compassOffset + 360) % 360;
-  };
-  const handleAbsolute = e => {
+let xrSession = null, xrRefSpace = null, northOffset = null, usingXR = false;
+
+async function startCompass() {
+  // iOS: DeviceOrientation (webkitCompassHeading already tilt-compensated)
+  if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission().then(s => {
+      if (s === 'granted') addEventListener('deviceorientation', e => {
+        if (e.webkitCompassHeading !== undefined)
+          rawH = (e.webkitCompassHeading + compassOffset + 360) % 360;
+      });
+    }).catch(() => {});
+    return;
+  }
+
+  // Android: ลอง WebXR inline ก่อน
+  const xrOk = await tryWebXR();
+  if (xrOk) {
+    document.getElementById('gps-txt').textContent += ' +XR';
+    return;
+  }
+
+  // Fallback: tilt-compensated DeviceOrientation
+  startDeviceOrientation();
+}
+
+async function tryWebXR() {
+  if (!navigator.xr) return false;
+  try {
+    const supported = await navigator.xr.isSessionSupported('inline');
+    if (!supported) return false;
+
+    xrSession = await navigator.xr.requestSession('inline');
+    xrRefSpace = await xrSession.requestReferenceSpace('viewer');
+
+    // ดึง absolute north จาก deviceorientationabsolute ครั้งเดียว
+    await new Promise(resolve => {
+      const getOnce = e => {
+        if (e.alpha === null) return;
+        window._absAlpha = e.alpha;
+        removeEventListener('deviceorientationabsolute', getOnce);
+        resolve();
+      };
+      addEventListener('deviceorientationabsolute', getOnce);
+      setTimeout(resolve, 2000); // timeout ถ้าไม่มี event
+    });
+
+    usingXR = true;
+    xrSession.requestAnimationFrame(xrFrame);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function xrFrame(time, frame) {
+  const pose = frame.getViewerPose(xrRefSpace);
+  if (pose) {
+    const q = pose.transform.orientation;
+    // แปลง quaternion → yaw (rotation รอบแกน Y-up ของ WebXR)
+    const xrYaw = Math.atan2(
+      2 * (q.w * q.y + q.z * q.x),
+      1 - 2 * (q.y * q.y + q.z * q.z)
+    ) * (180 / Math.PI);
+
+    // calibrate ครั้งแรก: หา offset ระหว่าง WebXR yaw กับ North
+    if (northOffset === null && window._absAlpha !== undefined) {
+      const absNorth = (360 - window._absAlpha) % 360;
+      northOffset = absNorth - xrYaw;
+    }
+
+    if (northOffset !== null)
+      rawH = ((xrYaw + northOffset + compassOffset) % 360 + 360) % 360;
+  }
+  xrSession.requestAnimationFrame(xrFrame);
+}
+
+function startDeviceOrientation() {
+  const handle = e => {
     if (e.alpha === null || e.beta === null || e.gamma === null) return;
     const D = Math.PI / 180;
     const a = e.alpha * D, b = e.beta * D, g = e.gamma * D;
-    // tilt-compensated: project camera direction (-Z device axis) onto horizontal plane
     const x = -Math.sin(g) * Math.cos(a) - Math.cos(g) * Math.sin(b) * Math.sin(a);
     const y = -Math.sin(g) * Math.sin(a) + Math.cos(g) * Math.sin(b) * Math.cos(a);
     const heading = (Math.atan2(x, y) * (180 / Math.PI) + 360) % 360;
     rawH = (heading + compassOffset + 360) % 360;
   };
-
-  if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
-    // iOS — requires permission prompt
-    DeviceOrientationEvent.requestPermission()
-      .then(s => { if (s === 'granted') addEventListener('deviceorientation', handleIOS); })
-      .catch(() => {});
-  } else {
-    // Android — deviceorientationabsolute ให้ทิศเหนือจริง (magnetic north)
-    // ถ้าไม่รองรับจึง fallback ไป deviceorientation
-    let gotAbsolute = false;
-    addEventListener('deviceorientationabsolute', e => {
-      gotAbsolute = true;
-      handleAbsolute(e);
-    });
-    setTimeout(() => {
-      if (!gotAbsolute) addEventListener('deviceorientation', handleAbsolute);
-    }, 500);
-  }
+  let gotAbsolute = false;
+  addEventListener('deviceorientationabsolute', e => { gotAbsolute = true; handle(e); });
+  setTimeout(() => { if (!gotAbsolute) addEventListener('deviceorientation', handle); }, 500);
 }
 
 // ═══ COMPASS HUD ═══
