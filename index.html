@@ -9,11 +9,40 @@
 <body>
 
 <div id="perm">
-  <div class="pi">⚔️</div>
+  <div class="perm-corner tl"></div>
+  <div class="perm-corner tr"></div>
+  <div class="perm-corner bl"></div>
+  <div class="perm-corner br"></div>
+
+  <div class="pi">
+    <div class="pi-halo"></div>
+    <svg class="pi-sword" viewBox="0 0 64 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="bladeG" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#7A5E1E"/>
+          <stop offset=".5" stop-color="#F0D080"/>
+          <stop offset="1" stop-color="#7A5E1E"/>
+        </linearGradient>
+        <linearGradient id="hiltG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#F0D080"/>
+          <stop offset="1" stop-color="#7A5E1E"/>
+        </linearGradient>
+      </defs>
+      <polygon points="32,4 38,110 26,110" fill="url(#bladeG)" stroke="#F0D080" stroke-width=".6"/>
+      <line x1="32" y1="14" x2="32" y2="106" stroke="#fff" stroke-opacity=".35" stroke-width=".8"/>
+      <rect x="8" y="110" width="48" height="6" rx="2" fill="url(#hiltG)"/>
+      <rect x="29" y="116" width="6" height="28" rx="1.5" fill="url(#hiltG)"/>
+      <circle cx="32" cy="148" r="6" fill="url(#hiltG)" stroke="#F0D080" stroke-width=".6"/>
+    </svg>
+  </div>
+
   <div class="pt">ตามรอยตากสิน</div>
+  <div class="pt-line"></div>
   <div class="pd">LOPBURI COMPASS AR<br>หันกล้องไปยังสถานที่ประวัติศาสตร์<br>เพื่อปลดล็อก VFX</div>
   <div id="perr"></div>
-  <button class="pb" onclick="startApp()">เปิดกล้อง</button>
+  <button class="pb" onclick="startApp()">
+    <span class="pb-icon">▣</span> เปิดกล้อง
+  </button>
 </div>
 
 <video id="video" autoplay playsinline muted></video>
@@ -35,7 +64,13 @@
 
   <div id="vfx-tag">◌ SEARCHING...</div>
 
-  <div id="aim"><div id="aim-dot"></div></div>
+  <div id="aim">
+    <div class="aim-tick t"></div>
+    <div class="aim-tick r"></div>
+    <div class="aim-tick b"></div>
+    <div class="aim-tick l"></div>
+    <div id="aim-dot"></div>
+  </div>
 
   <div id="popup">
     <div id="pop-icon">🏛️</div>
@@ -50,8 +85,13 @@
   </div>
 
   <div id="toast">
-    <div id="t-icon">⚔️</div>
+    <div class="t-stamp">
+      <div class="t-ring-outer"></div>
+      <div class="t-ring-inner"></div>
+      <div id="t-icon">⚔️</div>
+    </div>
     <div id="t-title">UNLOCKED</div>
+    <div class="t-rule"></div>
     <div id="t-sub"></div>
   </div>
 
