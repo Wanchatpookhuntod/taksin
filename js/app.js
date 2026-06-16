@@ -198,7 +198,7 @@ function updateAccuracy() {
   const phone = document.getElementById('cal-phone');
   if (hint) {
     if (compassUnreliable) {
-      hint.innerHTML = '⚠ เซนเซอร์ไม่ให้ทิศเหนือจริง<br>ใช้ปุ่มเล็งสถานที่ หรือปรับ offset เอง';
+      hint.innerHTML = '⚠ เซนเซอร์ไม่ให้ทิศเหนือจริง<br>ปรับ offset ด้วยมือ';
       hint.style.color = '#F44336';
     } else if (compassAccuracy > 0.85) {
       hint.innerHTML = '✓ เซนเซอร์เสถียรแล้ว';
@@ -219,34 +219,6 @@ function openCal() {
   const panel = document.getElementById('cal-panel');
   panel.style.display = 'flex';
   document.getElementById('cal-offset-val').textContent = fmtOffset(headingOffset);
-  const aimBtn = document.getElementById('cal-aim-btn');
-  if (aimBtn) aimBtn.disabled = !userLat; // ต้องมี GPS ถึงจะคำนวณ bearing ได้
-  const msg = document.getElementById('cal-aim-msg');
-  if (msg) msg.textContent = userLat ? '' : 'ต้องมีตำแหน่ง GPS ก่อนจึงจะเล็งได้';
-}
-
-// auto-calibrate: เล็งกล้องไปยังสถานที่จริงที่มองเห็น แล้วกดปรับ
-// → ตั้ง offset ให้ทิศปัจจุบันตรงกับ bearing ของ spot ที่กำลังเล็ง
-function calibrateToLandmark() {
-  const msg = document.getElementById('cal-aim-msg');
-  if (!userLat) { if (msg) msg.textContent = 'ยังไม่มีตำแหน่ง GPS'; return; }
-  // หา spot ที่ทิศตรงกับที่กำลังเล็งมากที่สุด
-  let best = null, bestDiff = 999, bestBear = 0;
-  SPOTS.forEach(s => {
-    const b = bear(userLat, userLng, s.lat, s.lng);
-    const d = Math.abs(adiff(smoothH, b));
-    if (d < bestDiff) { bestDiff = d; best = s; bestBear = b; }
-  });
-  if (!best) return;
-  // ชดเชยให้ทิศที่แสดง = bearing ของ spot
-  headingOffset += adiff(smoothH, bestBear);
-  if (headingOffset > 180) headingOffset -= 360;
-  if (headingOffset < -180) headingOffset += 360;
-  localStorage.setItem('headingOffset', headingOffset);
-  document.getElementById('cal-offset-val').textContent = fmtOffset(headingOffset);
-  compassUnreliable = false; // เล็ง landmark แล้วถือว่าทิศเชื่อถือได้
-  if (msg) msg.textContent = `ปรับเทียบกับ "${best.name}" แล้ว (offset ${fmtOffset(headingOffset)})`;
-  showToast('🎯', 'ปรับเทียบทิศแล้ว', best.name);
 }
 function closeCal() {
   document.getElementById('cal-panel').style.display = 'none';
