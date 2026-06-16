@@ -99,15 +99,20 @@ function startGPS() {
     const dot = document.getElementById('gps-dot');
     dot.style.animation = 'none'; dot.style.background = '#4CAF50'; dot.style.boxShadow = '0 0 5px #4CAF50';
     document.getElementById('gps-txt').textContent = 'GPS OK';
-    document.getElementById('coord-txt').textContent = `${userLat.toFixed(4)}, ${userLng.toFixed(4)}`;
+    document.getElementById('coord-txt').textContent = fmtCoord(userLat, userLng);
+    document.getElementById('gps-sat').classList.remove('off');
     updateChips();
   }, () => setDemo(), { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 });
 }
 function setDemo() {
   userLat = 14.7998; userLng = 100.6133;
   document.getElementById('gps-txt').textContent = 'Demo';
-  document.getElementById('coord-txt').textContent = `${userLat.toFixed(4)}, ${userLng.toFixed(4)}`;
+  document.getElementById('coord-txt').textContent = fmtCoord(userLat, userLng);
+  document.getElementById('gps-sat').classList.add('off');
   updateChips();
+}
+function fmtCoord(lat, lng) {
+  return `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lng).toFixed(4)}° ${lng >= 0 ? 'E' : 'W'}`;
 }
 
 // ═══ COMPASS ═══
@@ -212,6 +217,12 @@ function updateAccuracy() {
     }
   }
   if (phone) phone.classList.toggle('stable', compassAccuracy > 0.85 && !compassUnreliable);
+}
+
+// ═══ INFO ═══
+function showInfo() {
+  const n = SPOTS.length, u = Object.keys(unlocked).length;
+  showToast('ℹ️', 'ตามรอยตากสิน — Lopburi Compass AR', `ปลดล็อกแล้ว ${u}/${n} สถานที่ · หันกล้องหา spot`);
 }
 
 // ═══ CALIBRATION ═══

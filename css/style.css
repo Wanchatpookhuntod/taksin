@@ -52,24 +52,40 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 #hud{position:fixed;inset:0;z-index:3;pointer-events:none;display:none;font-family:sans-serif}
 
 /* top */
-#top{position:absolute;top:0;left:0;right:0;padding:18px 20px 14px;
-  background:linear-gradient(to bottom,rgba(4,2,1,.88),transparent);
-  display:flex;justify-content:space-between;align-items:flex-start}
-.tt{font-size:14px;letter-spacing:.15em;color:#C9A84C;text-shadow:0 0 10px rgba(201,168,76,.8)}
-.ts{font-size:9px;color:rgba(201,168,76,.3);letter-spacing:.2em;margin-top:2px}
-#gps-dot{width:7px;height:7px;border-radius:50%;background:#C9A84C;
-  box-shadow:0 0 5px #C9A84C;animation:blink 1.2s infinite;display:inline-block}
-#gps-txt{font-size:9px;color:rgba(201,168,76,.45);letter-spacing:.08em;vertical-align:middle;margin-left:5px}
-#coord-txt{font-size:9px;color:rgba(201,168,76,.28);margin-top:3px;text-align:right}
+#top{position:absolute;top:0;left:0;right:0;padding:14px 14px 12px;
+  background:linear-gradient(to bottom,rgba(4,2,1,.92),rgba(4,2,1,.45) 65%,transparent);
+  pointer-events:none}
+#top-bar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.top-btn{pointer-events:auto;width:42px;height:42px;flex:0 0 42px;border-radius:50%;
+  background:rgba(18,11,4,.6);border:1px solid rgba(201,168,76,.45);
+  color:#E8C77A;font-size:18px;line-height:1;cursor:pointer;font-family:serif;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 10px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,235,180,.07);transition:background .2s}
+.top-btn:active{background:rgba(201,168,76,.22)}
+#info-btn{font-style:italic;font-weight:600}
+.top-title{flex:1 1 auto;text-align:center;min-width:0}
+.tt{font-size:21px;letter-spacing:.05em;color:#F0D080;font-weight:600;line-height:1.1;
+  text-shadow:0 0 18px rgba(201,168,76,.85)}
+.ts{font-size:9px;color:rgba(201,168,76,.5);letter-spacing:.34em;margin-top:3px}
+
+#gps-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding:0 6px}
+#gps-dot{width:8px;height:8px;border-radius:50%;background:#C9A84C;
+  box-shadow:0 0 6px #C9A84C;animation:blink 1.2s infinite;flex:0 0 auto}
+#gps-txt{font-size:11px;color:rgba(222,202,150,.85);letter-spacing:.05em}
+.gps-div{width:1px;height:12px;background:rgba(201,168,76,.32);margin:0 2px;flex:0 0 auto}
+#coord-txt{font-size:11px;color:rgba(222,202,150,.72);letter-spacing:.02em;white-space:nowrap}
+.gps-sat{margin-left:auto;font-size:15px;opacity:.85;flex:0 0 auto;
+  filter:drop-shadow(0 0 5px rgba(201,168,76,.5));transition:opacity .3s,filter .3s}
+.gps-sat.off{opacity:.3;filter:grayscale(1)}
 
 /* compass strip */
-#cmp-wrap{position:absolute;top:72px;left:50%;transform:translateX(-50%);width:300px;height:56px}
+#cmp-wrap{position:absolute;top:100px;left:50%;transform:translateX(-50%);width:300px;height:56px}
 #cmp-cv{position:absolute;top:0;left:0;width:300px;height:56px}
 #cmp-line{position:absolute;bottom:0;left:50%;transform:translateX(-50%);
   width:2px;height:22px;background:#C9A84C;box-shadow:0 0 6px #C9A84C}
 
 /* vfx tag */
-#vfx-tag{position:absolute;top:136px;left:50%;transform:translateX(-50%);
+#vfx-tag{position:absolute;top:166px;left:50%;transform:translateX(-50%);
   background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);
   border-radius:20px;padding:4px 14px;font-size:10px;
   color:rgba(201,168,76,.5);letter-spacing:.1em;white-space:nowrap}
@@ -177,7 +193,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 }
 
 /* calibration button */
-#cal-btn{position:absolute;top:136px;right:16px;
+#cal-btn{position:absolute;top:166px;right:16px;
   background:rgba(4,2,1,.75);border:1px solid rgba(201,168,76,.25);border-radius:20px;
   color:rgba(201,168,76,.55);font-size:10px;letter-spacing:.08em;
   padding:5px 12px;cursor:pointer;pointer-events:auto;transition:all .3s;font-family:sans-serif}
