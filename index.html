@@ -107,14 +107,17 @@
   </div>
 
   <div class="cal-fig8-wrap">
-    <div class="cal-phone">📱</div>
+    <div class="cal-phone" id="cal-phone">📱</div>
   </div>
-  <div class="cal-hint">หมุนโทรศัพท์เป็นรูปเลข 8<br>เพื่อ calibrate เซ็นเซอร์แม่เหล็ก</div>
+  <div class="cal-hint" id="cal-fig8-hint">หมุนโทรศัพท์เป็นรูปเลข 8<br>เพื่อ calibrate เซ็นเซอร์แม่เหล็ก</div>
 
   <div class="cal-hdg-row">
     <span class="cal-hdg-label">ทิศปัจจุบัน</span>
     <span id="cal-heading">0°</span>
   </div>
+
+  <button class="cal-aim" id="cal-aim-btn" onclick="calibrateToLandmark()">🎯 เล็งสถานที่จริงแล้วกดปรับ</button>
+  <div class="cal-hint" id="cal-aim-msg" style="font-size:10px;opacity:.5;min-height:14px"></div>
 
   <div class="cal-offset-row">
     <button class="cal-adj" onclick="adjustOffset(-5)">−5°</button>

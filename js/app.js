@@ -13,8 +13,12 @@ let userLat = null, userLng = null, rawH = 0, smoothH = 0;
 let aimedSpot = null, activeVFX = null, vfxFade = 0;
 let unlocked = {}, toastTimer = null, T = 0;
 let ps = [], ss = [];
-let headingOffset = parseInt(localStorage.getItem('headingOffset') || '0');
+let headingOffset = parseInt(localStorage.getItem('headingOffset') || '0', 10);
 let hBuf = [], compassAccuracy = 1;
+let hwAccuracy = -1;              // iOS ฮาร์ดแวร์: 0-1 (-1 = ไม่รู้)
+let prevRawH = null, turnRate = 0; // ความเร็วหมุน — แยก motion ออกจาก noise
+let screenAngle = 0;             // มุมหมุนหน้าจอ — ชดเชย portrait/landscape
+let compassUnreliable = false;   // Android fallback ที่ไม่ใช่ทิศเหนือจริง
 
 // ═══ CANVAS ═══
 const cv = document.getElementById('vfx');
@@ -107,18 +111,28 @@ function setDemo() {
 }
 
 // ═══ COMPASS ═══
+function readScreenAngle() {
+  screenAngle = (screen.orientation && typeof screen.orientation.angle === 'number')
+    ? screen.orientation.angle
+    : (window.orientation || 0);
+}
 function startCompass() {
+  readScreenAngle();
+  addEventListener('orientationchange', readScreenAngle);
+
   const handleIOS = e => {
-    if (e.webkitCompassHeading !== undefined) {
-      rawH = (e.webkitCompassHeading + headingOffset + 360) % 360;
-      // webkitCompassAccuracy: องศาความเบี่ยงเบน, -1 = unknown
-      if (e.webkitCompassAccuracy >= 0)
-        compassAccuracy = Math.max(0, 1 - e.webkitCompassAccuracy / 45);
+    if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
+      // webkitCompassHeading = ทิศจริงที่ขอบบนเครื่องชี้ (CW) — ชดเชยการหมุนจอ
+      rawH = (e.webkitCompassHeading + screenAngle + headingOffset + 720) % 360;
+      // เก็บความแม่นยำฮาร์ดแวร์แยกไว้ ไม่ให้ถูก variance เขียนทับ
+      hwAccuracy = e.webkitCompassAccuracy >= 0
+        ? Math.max(0, 1 - e.webkitCompassAccuracy / 45)
+        : -1;
     }
   };
   const handleAbsolute = e => {
     if (e.alpha !== null)
-      rawH = ((360 - e.alpha + 360) % 360 + headingOffset + 360) % 360;
+      rawH = ((360 - e.alpha) + screenAngle + headingOffset + 720) % 360;
   };
 
   if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
@@ -135,30 +149,69 @@ function startCompass() {
       handleAbsolute(e);
     });
     setTimeout(() => {
-      if (!gotAbsolute) addEventListener('deviceorientation', handleAbsolute);
+      if (gotAbsolute) return;
+      // fallback: deviceorientation ธรรมดาจะอ้างอิงทิศเหนือจริงก็ต่อเมื่อ e.absolute === true
+      // ถ้าไม่ absolute ทิศจะเพี้ยน — เตือนผู้ใช้ให้ปรับ offset เอง
+      addEventListener('deviceorientation', e => {
+        compassUnreliable = !e.absolute;
+        handleAbsolute(e);
+      });
     }, 500);
   }
 }
 
 // ═══ COMPASS ACCURACY ═══
 function updateAccuracy() {
+  // ความเร็วการหมุน (°/เฟรม) — แยก "ผู้ใช้หมุนเครื่อง" ออกจาก "เซนเซอร์สั่น"
+  if (prevRawH !== null) turnRate = turnRate * 0.8 + Math.abs(adiff(prevRawH, rawH)) * 0.2;
+  prevRawH = rawH;
+  const turning = turnRate > 1.2; // ~>72°/วิ = กำลังหมุนหาสปอตปกติ
+
   hBuf.push(rawH);
   if (hBuf.length > 20) hBuf.shift();
-  if (hBuf.length < 8) return;
-  // circular mean resultant length — 1=เสถียร 0=สั่น
-  const sx = hBuf.reduce((s, h) => s + Math.sin(h * Math.PI / 180), 0);
-  const cx = hBuf.reduce((s, h) => s + Math.cos(h * Math.PI / 180), 0);
-  compassAccuracy = Math.sqrt(sx * sx + cx * cx) / hBuf.length;
+  if (hBuf.length >= 8 && !turning) {
+    // circular mean resultant length — 1=เสถียร 0=สั่น
+    const sx = hBuf.reduce((s, h) => s + Math.sin(h * Math.PI / 180), 0);
+    const cx = hBuf.reduce((s, h) => s + Math.cos(h * Math.PI / 180), 0);
+    const stability = Math.sqrt(sx * sx + cx * cx) / hBuf.length;
+    // รวมกับความแม่นยำฮาร์ดแวร์ iOS (ถ้ามี) — ไม่ให้ตัวใดเขียนทับอีกตัว
+    const target = hwAccuracy >= 0 ? Math.min(stability, hwAccuracy) : stability;
+    compassAccuracy = compassAccuracy * 0.7 + target * 0.3; // เปลี่ยนแบบนุ่มนวล
+  }
+  // ขณะหมุน: คงค่าเดิม ไม่เตือน calibration ผิดพลาด
+  const ok = compassAccuracy >= 0.75 && !compassUnreliable;
   const btn = document.getElementById('cal-btn');
-  if (btn) btn.classList.toggle('warn', compassAccuracy < 0.75);
+  if (btn) btn.classList.toggle('warn', !ok && !turning);
+
   // อัปเดต accuracy bar ใน panel
   const bar = document.getElementById('cal-acc-fill');
   if (bar) {
-    bar.style.width = `${Math.round(compassAccuracy * 100)}%`;
-    bar.style.background = compassAccuracy > 0.85 ? '#4CAF50' : compassAccuracy > 0.65 ? '#FFC107' : '#F44336';
+    const pct = compassUnreliable ? Math.min(compassAccuracy, 0.4) : compassAccuracy;
+    bar.style.width = `${Math.round(pct * 100)}%`;
+    bar.style.background = pct > 0.85 ? '#4CAF50' : pct > 0.65 ? '#FFC107' : '#F44336';
   }
   const calH = document.getElementById('cal-heading');
   if (calH) calH.textContent = `${Math.round(smoothH)}°`;
+
+  // feedback ระหว่างหมุนเลข 8 — ผูกกับค่าความเสถียรจริง
+  const hint = document.getElementById('cal-fig8-hint');
+  const phone = document.getElementById('cal-phone');
+  if (hint) {
+    if (compassUnreliable) {
+      hint.innerHTML = '⚠ เซนเซอร์ไม่ให้ทิศเหนือจริง<br>ใช้ปุ่มเล็งสถานที่ หรือปรับ offset เอง';
+      hint.style.color = '#F44336';
+    } else if (compassAccuracy > 0.85) {
+      hint.innerHTML = '✓ เซนเซอร์เสถียรแล้ว';
+      hint.style.color = '#7CCF80';
+    } else if (compassAccuracy > 0.65) {
+      hint.innerHTML = 'เกือบเสถียรแล้ว…<br>หมุนเลข 8 ต่ออีกนิด';
+      hint.style.color = '#E0C060';
+    } else {
+      hint.innerHTML = 'กำลัง calibrate…<br>หมุนโทรศัพท์เป็นรูปเลข 8';
+      hint.style.color = '#E08080';
+    }
+  }
+  if (phone) phone.classList.toggle('stable', compassAccuracy > 0.85 && !compassUnreliable);
 }
 
 // ═══ CALIBRATION ═══
@@ -166,6 +219,34 @@ function openCal() {
   const panel = document.getElementById('cal-panel');
   panel.style.display = 'flex';
   document.getElementById('cal-offset-val').textContent = fmtOffset(headingOffset);
+  const aimBtn = document.getElementById('cal-aim-btn');
+  if (aimBtn) aimBtn.disabled = !userLat; // ต้องมี GPS ถึงจะคำนวณ bearing ได้
+  const msg = document.getElementById('cal-aim-msg');
+  if (msg) msg.textContent = userLat ? '' : 'ต้องมีตำแหน่ง GPS ก่อนจึงจะเล็งได้';
+}
+
+// auto-calibrate: เล็งกล้องไปยังสถานที่จริงที่มองเห็น แล้วกดปรับ
+// → ตั้ง offset ให้ทิศปัจจุบันตรงกับ bearing ของ spot ที่กำลังเล็ง
+function calibrateToLandmark() {
+  const msg = document.getElementById('cal-aim-msg');
+  if (!userLat) { if (msg) msg.textContent = 'ยังไม่มีตำแหน่ง GPS'; return; }
+  // หา spot ที่ทิศตรงกับที่กำลังเล็งมากที่สุด
+  let best = null, bestDiff = 999, bestBear = 0;
+  SPOTS.forEach(s => {
+    const b = bear(userLat, userLng, s.lat, s.lng);
+    const d = Math.abs(adiff(smoothH, b));
+    if (d < bestDiff) { bestDiff = d; best = s; bestBear = b; }
+  });
+  if (!best) return;
+  // ชดเชยให้ทิศที่แสดง = bearing ของ spot
+  headingOffset += adiff(smoothH, bestBear);
+  if (headingOffset > 180) headingOffset -= 360;
+  if (headingOffset < -180) headingOffset += 360;
+  localStorage.setItem('headingOffset', headingOffset);
+  document.getElementById('cal-offset-val').textContent = fmtOffset(headingOffset);
+  compassUnreliable = false; // เล็ง landmark แล้วถือว่าทิศเชื่อถือได้
+  if (msg) msg.textContent = `ปรับเทียบกับ "${best.name}" แล้ว (offset ${fmtOffset(headingOffset)})`;
+  showToast('🎯', 'ปรับเทียบทิศแล้ว', best.name);
 }
 function closeCal() {
   document.getElementById('cal-panel').style.display = 'none';
@@ -518,7 +599,10 @@ function showToast(icon, title, sub) {
 // ═══ MAIN LOOP ═══
 function loop() {
   T += .016;
-  smoothH = sAngle(smoothH, rawH, .08);
+  // smoothing แบบ adaptive — ห่างมากตามเร็ว (ไม่หน่วง), ใกล้แล้วตามช้า (นิ่ง)
+  const d = Math.abs(adiff(smoothH, rawH));
+  const k = d > 30 ? 0.30 : d > 10 ? 0.16 : 0.07;
+  smoothH = sAngle(smoothH, rawH, k);
   updateAccuracy();
   checkAim();
   drawCompass();
