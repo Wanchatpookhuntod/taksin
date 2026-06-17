@@ -34,16 +34,124 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 .pi-sword{position:relative;height:155px;width:auto;
   filter:drop-shadow(0 0 14px rgba(240,208,128,.85)) drop-shadow(0 0 28px rgba(201,168,76,.5))}
 
-.pt{font-size:26px;color:#F0D080;margin-bottom:6px;
-  text-shadow:0 0 24px #C9A84C;letter-spacing:.12em;font-weight:600}
+/* content wrapper – nudged up 5% of the viewport.
+   use position:relative+top (NOT transform) so it doesn't create an
+   isolation group that would break mix-blend-mode:screen on the fx layers */
+.perm-content{display:flex;flex-direction:column;align-items:center;
+  position:relative;top:-2vh}
+
+/* perm icon stack: effect light behind, sword on top */
+.pi-stack{position:relative;display:flex;align-items:center;justify-content:center;
+  width:600px;height:600px;margin-bottom:22px}
+
+/* soft glowing aura at the base of the sword */
+.pi-aura{position:absolute;
+  left:50%;bottom:10%;
+  transform:translateX(-50%);
+  width:460px;height:280px;
+  z-index:0;pointer-events:none;
+  mix-blend-mode:screen;
+  background:radial-gradient(ellipse at 50% 55%,
+    rgba(247,200,130,.58),rgba(214,140,58,.24) 38%,rgba(140,80,24,.1) 62%,transparent 75%);
+  filter:blur(20px);
+  animation:pi-aura-pulse 9s linear infinite}
+  
+@keyframes pi-aura-pulse{
+  0%{opacity:.65;transform:translateX(-50%) rotate(0deg) scale(1)}
+  50%{opacity:1;transform:translateX(-50%) rotate(180deg) scale(1.1)}
+  100%{opacity:.65;transform:translateX(-50%) rotate(360deg) scale(1)}}
+.pi-fx{position:absolute;top:50%;left:50%;
+  width:600px;height:auto;z-index:1;mix-blend-mode:screen;pointer-events:none;
+  animation:pi-fx-spin 40s linear infinite, pi-fx-flicker 7s ease-in-out infinite}
+@keyframes pi-fx-spin{
+  from{transform:translate(-50%,-50%) rotate(0deg)}
+  to{transform:translate(-50%,-50%) rotate(360deg)}}
+/* organic light: smooth, uneven breathing glow (warm orange tint) */
+@keyframes pi-fx-flicker{
+  0%{opacity:.9;filter:brightness(1) saturate(1.05) hue-rotate(-4deg)}
+  22%{opacity:1;filter:brightness(1.18) saturate(1.05) hue-rotate(-4deg)}
+  40%{opacity:.84;filter:brightness(.96) saturate(1.05) hue-rotate(-4deg)}
+  55%{opacity:.97;filter:brightness(1.1) saturate(1.05) hue-rotate(-4deg)}
+  70%{opacity:.88;filter:brightness(1.02) saturate(1.05) hue-rotate(-4deg)}
+  85%{opacity:1;filter:brightness(1.2) saturate(1.05) hue-rotate(-4deg)}
+  100%{opacity:.9;filter:brightness(1) saturate(1.05) hue-rotate(-4deg)}}
+.pi-sword-img{position:relative;z-index:2;height:550px;width:auto;
+  filter:drop-shadow(0 0 14px rgba(245, 218, 110, 0.85)) drop-shadow(0 0 28px rgba(214,140,58,.5))}
+/* moving shine clipped to the sword shape (on top of the blade) */
+.pi-sword-shine{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:600px;height:600px;z-index:3;pointer-events:none;mix-blend-mode:screen;
+  -webkit-mask-image:url(../assets/sword-200.png);-webkit-mask-repeat:no-repeat;
+  -webkit-mask-position:center;-webkit-mask-size:auto 550px;
+  mask-image:url(../assets/sword-200.png);mask-repeat:no-repeat;
+  mask-position:center;mask-size:auto 550px;
+  background:linear-gradient(115deg,transparent 42%,rgba(255,250,225,.95) 50%,transparent 58%);
+  background-size:260% 260%;
+  animation:sword-shine 3.2s ease-in-out infinite alternate}
+@keyframes sword-shine{
+  from{background-position:125% 0}
+  to{background-position:-25% 0}}
+
+/* radial particles emitting from effect-light center */
+.pi-particles{position:absolute;top:50%;left:50%;width:0;height:0;z-index:1;
+  pointer-events:none;mix-blend-mode:screen}
+.pi-particles .p{position:absolute;top:0;left:0;border-radius:50%;
+  background:radial-gradient(circle,#FBDD9E,#D68C3A 55%,transparent 75%);
+  box-shadow:0 0 6px rgba(240,170,90,.8);
+  opacity:0;will-change:transform,opacity;
+  animation:pi-particle var(--dur) ease-out var(--delay) infinite}
+/* glowing trail pointing back toward center (real child element) */
+.pi-particles .tail{position:absolute;left:50%;top:50%;
+  width:2px;height:var(--tail,40px);transform:translateX(-50%);
+  background:linear-gradient(to bottom,rgba(250,205,140,.85),rgba(214,140,58,.25) 45%,transparent);
+  border-radius:2px;filter:blur(.5px)}
+@keyframes pi-particle{
+  0%{opacity:0;transform:rotate(var(--a)) translateY(0) scale(.3)}
+  10%{opacity:1}
+  88%{opacity:1}
+  100%{opacity:0;transform:rotate(var(--a)) translateY(calc(var(--dist) * -1)) scale(1)}}
+
+.pt{
+  font-size:42px;
+  margin-top:-28px;
+  /* margin-bottom:6px; */
+  letter-spacing:.12em;
+  font-weight:430;
+  /* vertical gold gradient: bright top -> deep bottom */
+  color:#F0D080;
+  background:linear-gradient(to bottom,#FFF3C4 0%,#F0D080 45%,#c8a547 75%,#987626 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-shadow:0 0 24px rgba(201,168,76,.5)}
+
+
 .pt-line{width:54px;height:1px;background:linear-gradient(90deg,transparent,#C9A84C,transparent);
   margin:0 auto 14px;box-shadow:0 0 8px rgba(201,168,76,.6)}
-.pd{font-size:12px;color:rgba(201,168,76,.55);line-height:2.2;margin-bottom:28px;letter-spacing:.05em}
-.pb{background:linear-gradient(135deg,#7A5E1E,#C9A84C);color:#050301;border:none;
-  padding:14px 40px;border-radius:40px;font-size:14px;letter-spacing:.14em;cursor:pointer;font-weight:700;
-  box-shadow:0 0 28px rgba(201,168,76,.45),inset 0 0 0 1px rgba(255,235,180,.4);
-  display:inline-flex;align-items:center;gap:10px}
-.pb-icon{font-size:14px;line-height:1}
+.pd{
+  font-size:18px;
+  color:rgba(201,168,76,.55);
+  line-height:2.2;
+  margin-bottom:28px;
+  letter-spacing:.05em}
+
+
+
+.pe{font-size:24px;
+  color:#F0D080;
+  background:linear-gradient(to bottom,#FFF3C4 0%,#F0D080 45%,#c8a547 75%,#987626 100%);
+ -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-shadow:0 0 24px rgba(201,168,76,.5);
+
+  line-height:2.2;
+  margin-bottom:14px;
+  letter-spacing:.05em}
+
+.pb{background:none;border:none;padding:0;cursor:pointer;line-height:0;
+  filter:drop-shadow(0 0 18px rgba(201,168,76,.45));
+  transition:transform .15s ease,filter .15s ease}
+.pb img{display:block;width:260px;height:auto;pointer-events:none}
+.pb:hover{filter:drop-shadow(0 0 26px rgba(240,208,128,.7))}
+.pb:active{transform:scale(.96)}
 #perr{color:#ff7070;font-size:12px;margin-bottom:14px;max-width:290px;line-height:1.7;display:none}
 
 @keyframes halo-pulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.08);opacity:1}}

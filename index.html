@@ -17,7 +17,7 @@
   <div class="perm-corner bl"></div>
   <div class="perm-corner br"></div>
 
-  <div class="pi">
+  <!-- <div class="pi">
     <div class="pi-halo"></div>
     <svg class="pi-sword" viewBox="0 0 64 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <defs>
@@ -37,15 +37,24 @@
       <rect x="29" y="116" width="6" height="28" rx="1.5" fill="url(#hiltG)"/>
       <circle cx="32" cy="148" r="6" fill="url(#hiltG)" stroke="#F0D080" stroke-width=".6"/>
     </svg>
+  </div> -->
+  <div class="perm-content">
+    <div class="pi-stack">
+      <div class="pi-aura"></div>
+      <img class="pi-fx" src="assets/effect-light-1-600.png" alt="">
+      <div class="pi-particles" id="pi-particles"></div>
+      <img class="pi-sword-img" src="assets/sword-200.png" alt="">
+      <div class="pi-sword-shine"></div>
+    </div>
+    <div class="pt">ตามรอยพระเจ้าตาก</div>
+    <div class="pt-line"></div>
+    <div class="pe">FOLLOWING KING TAKSIN</div>
+    <div class="pd">หันกล้องไปยังสถานที่ประวัติศาสตร์<br>เพื่อปลดล็อก VFX</div>
+    <div id="perr"></div>
+    <button class="pb" onclick="startApp()">
+      <img src="assets/open-camera-600.png" alt="เปิดกล้อง">
+    </button>
   </div>
-
-  <div class="pt">ตามรอยพระเจ้าตาก</div>
-  <div class="pt-line"></div>
-  <div class="pd">LOPBURI COMPASS AR<br>หันกล้องไปยังสถานที่ประวัติศาสตร์<br>เพื่อปลดล็อก VFX</div>
-  <div id="perr"></div>
-  <button class="pb" onclick="startApp()">
-    <span class="pb-icon">▣</span> เปิดกล้อง
-  </button>
 </div>
 
 <video id="video" autoplay playsinline muted></video>
@@ -132,6 +141,58 @@
   </div>
 </div>
 
+<script>
+// radial particles emitting from effect-light center
+(function(){
+  var box = document.getElementById('pi-particles');
+  if(!box) return;
+  var N = 200;
+  var FADE_AT = 300;          // px – tail must be fully gone by this radius
+  var FADE_SPAN = 250;        // px – distance over which the tail fades to 0
+  var kfNeeded = {};          // unique keyframes actually used
+  for(var i=0;i<N;i++){
+    var p = document.createElement('span');
+    p.className = 'p';
+    var size = 3 + Math.random()*4;            // 3–7px
+    p.style.width = p.style.height = size + 'px';
+    p.style.marginLeft = (-size/2) + 'px';
+    p.style.marginTop = (-size/2) + 'px';
+    var dist = 200 + Math.random()*800;          // 200–1000px
+    var speed = 24 + Math.random()*10;           // px/s (≈ same as before)
+    var dur = dist / speed;                       // longer travel = longer life
+    var delay = -Math.random()*dur;
+    p.style.setProperty('--a', (Math.random()*360) + 'deg');
+    p.style.setProperty('--dist', dist + 'px');
+    p.style.setProperty('--tail', (30 + Math.random()*40) + 'px');
+    p.style.setProperty('--dur', dur + 's');
+    p.style.setProperty('--delay', delay + 's');
+
+    var tail = document.createElement('i');
+    tail.className = 'tail';
+    if(dist > FADE_AT){
+      // fade window: from (FADE_AT - FADE_SPAN) up to FADE_AT, as % of travel
+      var fs = Math.max(0, Math.round((FADE_AT - FADE_SPAN)/dist*100));
+      var fe = Math.round(FADE_AT/dist*100);
+      if(fe <= fs) fs = fe - 1;
+      var key = fs + '_' + fe;
+      kfNeeded[key] = true;
+      // tail uses the SAME dur/delay as the particle -> stays in sync
+      tail.style.animation = 'pi-tailfade'+key+' '+dur+'s linear '+delay+'s infinite';
+    }
+    p.appendChild(tail);
+    box.appendChild(p);
+  }
+  // inject the keyframes that were actually used
+  var css = '';
+  for(var k in kfNeeded){
+    var parts = k.split('_');     // [fadeStart%, fadeEnd%]
+    css += '@keyframes pi-tailfade'+k+'{0%,'+parts[0]+'%{opacity:1}'+parts[1]+'%{opacity:0}100%{opacity:0}}';
+  }
+  var st = document.createElement('style');
+  st.textContent = css;
+  document.head.appendChild(st);
+})();
+</script>
 <script src="js/app.js"></script>
 </body>
 </html>
