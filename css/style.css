@@ -390,7 +390,7 @@ html,body
 
 .pd
 {
-  font-size:clamp(13px,3.6vw,18px);
+  font-size:clamp(18px,3.6vw,26px);
   white-space:nowrap;
   line-height:2.2;
   margin-bottom:28px;
