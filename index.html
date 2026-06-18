@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=mobile_2">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -18,41 +19,21 @@
   <div class="perm-corner tr"></div>
   <div class="perm-corner bl"></div>
   <div class="perm-corner br"></div>
+  
+  <div class="pi-stack">
+    <div class="pi-aura"></div>
+    <img class="pi-fx" src="assets/effect-light-1-600.png" alt="">
+    <div class="pi-particles" id="pi-particles"></div>
+    <img class="pi-sword-img" src="assets/sword-200.png" alt="">
+    <div class="pi-sword-shine"></div>
+  </div>
 
-  <!-- <div class="pi">
-    <div class="pi-halo"></div>
-    <svg class="pi-sword" viewBox="0 0 64 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <defs>
-        <linearGradient id="bladeG" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="#7A5E1E"/>
-          <stop offset=".5" stop-color="#F0D080"/>
-          <stop offset="1" stop-color="#7A5E1E"/>
-        </linearGradient>
-        <linearGradient id="hiltG" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#F0D080"/>
-          <stop offset="1" stop-color="#7A5E1E"/>
-        </linearGradient>
-      </defs>
-      <polygon points="32,4 38,110 26,110" fill="url(#bladeG)" stroke="#F0D080" stroke-width=".6"/>
-      <line x1="32" y1="14" x2="32" y2="106" stroke="#fff" stroke-opacity=".35" stroke-width=".8"/>
-      <rect x="8" y="110" width="48" height="6" rx="2" fill="url(#hiltG)"/>
-      <rect x="29" y="116" width="6" height="28" rx="1.5" fill="url(#hiltG)"/>
-      <circle cx="32" cy="148" r="6" fill="url(#hiltG)" stroke="#F0D080" stroke-width=".6"/>
-    </svg>
-  </div> -->
   <div class="perm-ambient" id="perm-ambient"></div>
   <div class="perm-content">
-    <div class="pi-stack">
-      <div class="pi-aura"></div>
-      <img class="pi-fx" src="assets/effect-light-1-600.png" alt="">
-      <div class="pi-particles" id="pi-particles"></div>
-      <img class="pi-sword-img" src="assets/sword-200.png" alt="">
-      <div class="pi-sword-shine"></div>
-    </div>
     <div class="pt">ตามรอยพระเจ้าตาก</div>
     <div style="font-family: DM Serif Display;" class="pe">FOLLOWING KING TAKSIN</div>
     <div style="margin-top: 20px;" class="pt-line"></div>
-    <div style="font-size: 1.5rem;" class="pd">หันกล้องไปยังสถานที่ประวัติศาสตร์<br>ปลดปล่อยแสงแห่งพระธาตุ</div>
+    <div class="pd">หันกล้องไปยังสถานที่ประวัติศาสตร์<br>ปลดปล่อยแสงแห่งพระธาตุ</div>
     <div id="perr"></div>
     <button class="pb" onclick="startApp()">
       <img src="assets/open-camera-600.png" alt="เปิดกล้อง">
@@ -65,7 +46,7 @@
 
 <div id="hud">
   <div id="top">
-    <div><div class="tt">ตามรอยพระเจ้าตาก</div><div class="ts">LOPBURI COMPASS AR</div></div>
+    <div><div class="tt">ตามรอยพระเจ้าตาก</div><div class="ts">FOLLOWING KING TAKSIN</div></div>
     <div style="text-align:right">
       <div><span id="gps-dot"></span><span id="gps-txt">GPS...</span></div>
       <div id="coord-txt">---, ---</div>
