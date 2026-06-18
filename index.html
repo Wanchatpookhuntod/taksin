@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=mobile_2">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -38,6 +40,7 @@
       <circle cx="32" cy="148" r="6" fill="url(#hiltG)" stroke="#F0D080" stroke-width=".6"/>
     </svg>
   </div> -->
+  <div class="perm-ambient" id="perm-ambient"></div>
   <div class="perm-content">
     <div class="pi-stack">
       <div class="pi-aura"></div>
@@ -47,9 +50,9 @@
       <div class="pi-sword-shine"></div>
     </div>
     <div class="pt">ตามรอยพระเจ้าตาก</div>
-    <div class="pt-line"></div>
-    <div class="pe">FOLLOWING KING TAKSIN</div>
-    <div class="pd">หันกล้องไปยังสถานที่ประวัติศาสตร์<br>เพื่อปลดล็อก VFX</div>
+    <div style="font-family: DM Serif Display;" class="pe">FOLLOWING KING TAKSIN</div>
+    <div style="margin-top: 20px;" class="pt-line"></div>
+    <div style="font-size: 1.5rem;" class="pd">หันกล้องไปยังสถานที่ประวัติศาสตร์<br>ปลดปล่อยแสงแห่งพระธาตุ</div>
     <div id="perr"></div>
     <button class="pb" onclick="startApp()">
       <img src="assets/open-camera-600.png" alt="เปิดกล้อง">
@@ -191,6 +194,30 @@
   var st = document.createElement('style');
   st.textContent = css;
   document.head.appendChild(st);
+})();
+
+// ambient floating dust drifting up the whole screen (atmosphere)
+(function(){
+  var box = document.getElementById('perm-ambient');
+  if(!box) return;
+  var N = 100;
+  for(var i=0;i<N;i++){
+    var a = document.createElement('span');
+    a.className = 'amb';
+    var size = 3 + Math.random()*4;            // 2–6px
+    a.style.width = a.style.height = size + 'px';
+    a.style.left = (Math.random()*200) + '%';
+    a.style.top = (Math.random()*100) + '%';   // scattered across the whole screen
+    var dur = 6 + Math.random()*8;             // 6–14s gentle bob
+    a.style.setProperty('--dur', dur + 's');
+    a.style.setProperty('--delay', (-Math.random()*dur) + 's');
+    // small meandering drift, not a full-screen rise
+    a.style.setProperty('--dx', ((Math.random()*2-1)*100) + 'px');
+    a.style.setProperty('--dy', ((Math.random()*2-1)*100) + 'px');
+    a.style.setProperty('--op0', (0.15 + Math.random()*0.25).toFixed(2));
+    a.style.setProperty('--op1', (0.45 + Math.random()*0.4).toFixed(2));
+    box.appendChild(a);
+  }
 })();
 </script>
 <script src="js/app.js"></script>

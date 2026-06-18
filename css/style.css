@@ -34,11 +34,26 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 .pi-sword{position:relative;height:155px;width:auto;
   filter:drop-shadow(0 0 14px rgba(240,208,128,.85)) drop-shadow(0 0 28px rgba(201,168,76,.5))}
 
+/* ambient floating dust/embers across the whole perm screen */
+.perm-ambient{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.perm-ambient .amb{position:absolute;border-radius:50%;
+  background:radial-gradient(circle,rgba(247,224,160,.95),rgba(201,168,76,.35) 60%,transparent 75%);
+  will-change:transform,opacity;
+  animation:amb-float var(--dur) ease-in-out var(--delay) infinite alternate}
+/* gentle drift back-and-forth + twinkle (stays roughly in place) */
+@keyframes amb-float{
+  0%{transform:translate(0,0);opacity:var(--op0)}
+  100%{transform:translate(var(--dx),var(--dy));opacity:var(--op1)}}
+
 /* content wrapper – nudged up 5% of the viewport.
    use position:relative+top (NOT transform) so it doesn't create an
    isolation group that would break mix-blend-mode:screen on the fx layers */
-.perm-content{display:flex;flex-direction:column;align-items:center;
-  position:relative;top:-2vh}
+.perm-content{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  position:relative;top:-2vh
+}
 
 /* perm icon stack: effect light behind, sword on top */
 .pi-stack{position:relative;display:flex;align-items:center;justify-content:center;
@@ -75,9 +90,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
   70%{opacity:.88;filter:brightness(1.02) saturate(1.05) hue-rotate(-4deg)}
   85%{opacity:1;filter:brightness(1.2) saturate(1.05) hue-rotate(-4deg)}
   100%{opacity:.9;filter:brightness(1) saturate(1.05) hue-rotate(-4deg)}}
-.pi-sword-img{position:relative;z-index:2;height:550px;width:auto;
+
+  .pi-sword-img{position:relative;z-index:2;height:550px;width:auto;
   filter:drop-shadow(0 0 14px rgba(245, 218, 110, 0.85)) drop-shadow(0 0 28px rgba(214,140,58,.5))}
 /* moving shine clipped to the sword shape (on top of the blade) */
+
 .pi-sword-shine{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   width:600px;height:600px;z-index:3;pointer-events:none;mix-blend-mode:screen;
   -webkit-mask-image:url(../assets/sword-200.png);-webkit-mask-repeat:no-repeat;
@@ -92,18 +109,29 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
   to{background-position:-25% 0}}
 
 /* radial particles emitting from effect-light center */
-.pi-particles{position:absolute;top:50%;left:50%;width:0;height:0;z-index:1;
+.pi-particles{
+  position:absolute;
+  top:50%;left:50%;
+  width:0;height:0;
+  z-index:1;
   pointer-events:none;mix-blend-mode:screen}
-.pi-particles .p{position:absolute;top:0;left:0;border-radius:50%;
+
+.pi-particles .p{
+  position:absolute;
+  top:0;
+  left:0;border-radius:50%;
   background:radial-gradient(circle,#FBDD9E,#D68C3A 55%,transparent 75%);
   box-shadow:0 0 6px rgba(240,170,90,.8);
   opacity:0;will-change:transform,opacity;
-  animation:pi-particle var(--dur) ease-out var(--delay) infinite}
+  animation:pi-particle var(--dur) ease-out var(--delay) infinite
+}
+
 /* glowing trail pointing back toward center (real child element) */
 .pi-particles .tail{position:absolute;left:50%;top:50%;
   width:2px;height:var(--tail,40px);transform:translateX(-50%);
   background:linear-gradient(to bottom,rgba(250,205,140,.85),rgba(214,140,58,.25) 45%,transparent);
   border-radius:2px;filter:blur(.5px)}
+
 @keyframes pi-particle{
   0%{opacity:0;transform:rotate(var(--a)) translateY(0) scale(.3)}
   10%{opacity:1}
@@ -124,31 +152,51 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
   text-shadow:0 0 24px rgba(201,168,76,.5)}
 
 
-.pt-line{width:54px;height:1px;background:linear-gradient(90deg,transparent,#C9A84C,transparent);
-  margin:0 auto 14px;box-shadow:0 0 8px rgba(201,168,76,.6)}
+.pt-line
+{
+  margin-top:200px;
+  width:350px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,#C9A84C,transparent);
+  margin:0 auto 14px;
+  box-shadow:0 0 8px rgba(201,168,76,.6)
+}
+
 .pd{
   font-size:18px;
-  color:rgba(201,168,76,.55);
   line-height:2.2;
   margin-bottom:28px;
-  letter-spacing:.05em}
+  letter-spacing:.05em;
+  /* dim gold text with a light sweep running across */
+  color:rgba(201,168,76,.55);
+  background:linear-gradient(110deg,
+    rgba(201,168,76,.55) 0%,rgba(201,168,76,.55) 44%,
+    #FFF3C4 50%,
+    rgba(201,168,76,.55) 56%,rgba(201,168,76,.55) 100%);
+  background-size:300% 100%;
+  background-repeat:no-repeat;
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:pd-shine 7s linear infinite}
+@keyframes pd-shine{
+  0%{background-position:0% 0}
+  29%{background-position:100% 0}
+  100%{background-position:100% 0}}
 
-
-
-.pe{font-size:24px;
+.pe{
+  font-size:32px;
   color:#F0D080;
   background:linear-gradient(to bottom,#FFF3C4 0%,#F0D080 45%,#c8a547 75%,#987626 100%);
  -webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;
   text-shadow:0 0 24px rgba(201,168,76,.5);
-
   line-height:2.2;
-  margin-bottom:14px;
   letter-spacing:.05em}
 
 .pb{background:none;border:none;padding:0;cursor:pointer;line-height:0;
   filter:drop-shadow(0 0 18px rgba(201,168,76,.45));
   transition:transform .15s ease,filter .15s ease}
+
 .pb img{display:block;width:260px;height:auto;pointer-events:none}
 .pb:hover{filter:drop-shadow(0 0 26px rgba(240,208,128,.7))}
 .pb:active{transform:scale(.96)}
