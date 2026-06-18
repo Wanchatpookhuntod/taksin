@@ -6,11 +6,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 /* PERM */
 #perm{position:fixed;inset:0;z-index:50;
   background:
-    radial-gradient(ellipse at 50% 35%, rgba(201,168,76,.10), transparent 55%),
-    radial-gradient(ellipse at 50% 100%, rgba(122,94,30,.18), transparent 70%),
-    #050301;
+    radial-gradient(ellipse at 50% 35%, rgba(158, 123, 28, 0.346), transparent 55%),
+    radial-gradient(ellipse at 50% 100%, rgba(129, 93, 8, 0.09), transparent 70%),
+    #020100;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:40px;text-align:center;font-family:sans-serif;overflow:hidden}
+  padding-top: 0px;text-align:center;font-family:sans-serif;overflow:hidden}
 
 /* ornate corner marks */
 .perm-corner{position:absolute;width:42px;height:42px;
@@ -34,15 +34,164 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 .pi-sword{position:relative;height:155px;width:auto;
   filter:drop-shadow(0 0 14px rgba(240,208,128,.85)) drop-shadow(0 0 28px rgba(201,168,76,.5))}
 
-.pt{font-size:26px;color:#F0D080;margin-bottom:6px;
-  text-shadow:0 0 24px #C9A84C;letter-spacing:.12em;font-weight:600}
-.pt-line{width:54px;height:1px;background:linear-gradient(90deg,transparent,#C9A84C,transparent);
-  margin:0 auto 14px;box-shadow:0 0 8px rgba(201,168,76,.6)}
-.pd{font-size:12px;color:rgba(201,168,76,.55);line-height:2.2;margin-bottom:28px;letter-spacing:.05em}
-.pb{background:linear-gradient(135deg,#7A5E1E,#C9A84C);color:#050301;border:none;
-  padding:14px 40px;border-radius:40px;font-size:14px;letter-spacing:.14em;cursor:pointer;font-weight:700;
+.pt{
+  font-size: 32px;
+  background: linear-gradient(180deg, #ffe18d, #936804);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 6px;
+  text-shadow: 0 0 24px rgba(88, 69, 16, 0.55);
+  letter-spacing: .12em;
+  font-weight: 400;}
+
+.pt-line{
+  width:280px;
+  height:1px;background:linear-gradient(90deg,transparent,#C9A84C,transparent);
+  margin:1rem auto 14px;
+  box-shadow:0 0 8px rgba(201,168,76,.6)
+}
+
+.pe{
+  font-size: 1.3rem;
+  background: linear-gradient(180deg, #e8c76b, #7A5E1E);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 6px;
+  text-shadow: 0 0 24px rgba(201,168,76,.55);
+  letter-spacing: .12em;
+  font-weight: 400;
+
+}
+
+.pd{
+  font-size:1.1rem;
+  color:rgba(254, 215, 123, 0.55);
+  line-height:2.2;
+  margin-bottom:28px;
+  letter-spacing:.05em
+}
+
+.pb{
+  background:linear-gradient(135deg,#7A5E1E,#C9A84C);
+  color:#050301;border:none;
+  padding:24px 80px;
+  border-radius:40px;
+  font-size:18px;
+  letter-spacing:.14em;cursor:pointer;
+  font-weight:700;
   box-shadow:0 0 28px rgba(201,168,76,.45),inset 0 0 0 1px rgba(255,235,180,.4);
-  display:inline-flex;align-items:center;gap:10px}
+  display:inline-flex;align-items:center;
+  gap:10px
+}
+
+.sword-img{
+  display: block;
+  margin-top: -60px;   /* ค่ายิ่งติดลบมาก ดาบยิ่งสูงขึ้น */
+}
+
+.blend-img{
+  margin-top: 50px;
+  display: flex;
+  width: 300px;
+  mix-blend-mode: screen;
+  z-index:49;
+  position: absolute;
+  left: 50%;
+  top: 0%;
+  transform: translate(-50%, -50%);
+
+}
+
+.scene{
+  display: block;
+  mix-blend-mode: screen;
+  position: absolute;
+  inset: 0;            /* กางเต็ม #perm เพื่อเป็น containing block ที่มีความสูงจริง */
+  z-index: -1;         /* เหนือพื้นหลัง #perm แต่ใต้ดาบ/ข้อความ/ปุ่ม */
+  pointer-events: none;
+}
+
+
+.blend-wrap {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  transform: translate(-50%, -50%);
+
+}
+
+/* ===== particle ล่องลอย (ฝุ่นทอง) ===== */
+.perm-particles{
+  position:absolute;
+  inset:0;
+  z-index:-1;            /* เหนือพื้นหลัง แต่ใต้ดาบ/ข้อความ/ปุ่ม */
+  pointer-events:none;
+  overflow:hidden;
+}
+.particle{
+  position:absolute;
+  bottom:-20px;          /* เริ่มจากใต้จอ ลอยขึ้น */
+  border-radius:50%;
+  background:radial-gradient(circle, #F0D080 0%, rgba(201,168,76,.6) 40%, transparent 70%);
+  box-shadow:0 0 6px rgba(240,208,128,.8);
+  opacity:0;
+  animation:floatUp linear infinite;
+}
+@keyframes floatUp{
+  0%   {opacity:0;            transform:translateY(0)        translateX(0)    scale(.6)}
+  10%  {opacity:.9}
+  50%  {                       transform:translateY(-55vh)   translateX(18px) scale(1)}
+  90%  {opacity:.7}
+  100% {opacity:0;            transform:translateY(-110vh)  translateX(-12px) scale(.5)}
+}
+
+/* ===== particle กระจายรัศมีจากกลางภาพหมุน ===== */
+.radiate-particles{
+  position:absolute;
+  left:50%;
+  top:30%;               /* ตรงกับจุดกึ่งกลางของ .blend-wrap */
+  width:0;
+  height:0;
+  pointer-events:none;
+}
+.radiate-particles .rp{
+  position:absolute;
+  left:0;
+  top:0;
+  border-radius:50%;
+  background:radial-gradient(circle, #FCE6AE 0%, rgba(201,168,76,.7) 45%, transparent 72%);
+  box-shadow:0 0 6px rgba(240,208,128,.9);
+  opacity:0;
+  /* --tx/--ty กำหนดทิศ+ระยะปลายทาง (ตั้งใน JS), --dur คือคาบ */
+  animation:radiate var(--dur,4s) ease-out infinite;
+  animation-delay:var(--delay,0s);
+}
+@keyframes radiate{
+  0%   {opacity:0;   transform:translate(0,0)                       scale(.2)}
+  15%  {opacity:1}
+  70%  {opacity:.8}
+  100% {opacity:0;   transform:translate(var(--tx),var(--ty))       scale(1)}
+}
+
+.rotate-img {
+  display: block;
+  width: 400px;
+  transform-origin: center center;
+  animation: rotate360 90s linear infinite;
+  opacity: 0.8;        /* 0 = โปร่งใสหมด, 1 = ทึบเต็ม */
+}
+
+@keyframes rotate360 {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .pb-icon{font-size:14px;line-height:1}
 #perr{color:#ff7070;font-size:12px;margin-bottom:14px;max-width:290px;line-height:1.7;display:none}
 
