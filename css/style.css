@@ -1,8 +1,9 @@
 
 :root
 {
-  /* icon stack scales with the viewport; everything below is a fraction of it */
-  --stack: min(600px, 110vw);
+  /* icon stack scales with the viewport; everything below is a fraction of it.
+     bounded by width AND height so it never pushes the title/button off-screen */
+  --stack: min(600px, 88vw, 46vh);
   --sword: calc(var(--stack) * 0.833);
 }
 
