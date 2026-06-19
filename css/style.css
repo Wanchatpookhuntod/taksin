@@ -371,11 +371,18 @@ html,body
   font-style: normal;
   /* vertical gold gradient: bright top -> deep bottom */
   color:#F0D080;
-  background:linear-gradient(to bottom,#FFF3C4 0%,#F0D080 45%,#d3a83d 75%,#b78f17 100%);
+  /* layer 1 = moving white sweep (on top), layer 2 = original gold gradient (fixed) */
+  background:
+    linear-gradient(110deg,transparent 47.5%,rgba(255,255,255,.95) 50%,transparent 52.5%),
+    linear-gradient(to bottom,#FFF3C4 0%,#F0D080 45%,#d3a83d 75%,#b78f17 100%);
+  background-repeat:no-repeat;
+  background-size:300% 100%,100% 100%;
+  background-position:0% 0,0 0;
   -webkit-background-clip:text;
   background-clip:text;
   -webkit-text-fill-color:transparent;
   text-shadow:0 0 24px rgba(201,168,76,.5);
+  animation:title-shine 5s linear infinite;
 }
 
 .pt-line
@@ -415,18 +422,33 @@ html,body
   100%{background-position:100% 0}
 }
 
+/* sweep only the shine layer; the gold gradient (2nd layer) stays at 0 0 */
+@keyframes title-shine
+{
+  0%{background-position:0% 0,0 0}
+  40%{background-position:100% 0,0 0}
+  100%{background-position:100% 0,0 0}
+}
+
 .pe
 {
   font-size:clamp(24px,4.4vw,32px);
   white-space:nowrap;
   color:#F0D080;
-  background: linear-gradient(to bottom,#FFF3C4 0%,#F0D080 45%,#d3a83d 75%,#b78f17 100%);
+  /* same two-layer trick: white sweep over the fixed gold gradient */
+  background:
+    linear-gradient(110deg,transparent 47.5%,rgba(255,255,255,.95) 50%,transparent 52.5%),
+    linear-gradient(to bottom,#FFF3C4 0%,#F0D080 45%,#d3a83d 75%,#b78f17 100%);
+  background-repeat:no-repeat;
+  background-size:300% 100%,100% 100%;
+  background-position:0% 0,0 0;
   -webkit-background-clip:text;
   background-clip:text;
   -webkit-text-fill-color:transparent;
   text-shadow:0 0 24px rgba(201,168,76,.5);
   line-height:2.2;
   letter-spacing:.05em;
+  animation:title-shine 5s linear .6s infinite;
 }
 
 .pb
